@@ -6,26 +6,25 @@ import UserContext from "./UserContext";
 import UserProfile from "./components/UserProfile";
 
 export default function App() {
+  const users = [
+    { name: "Alice", age: 25, bio: "Loves hiking and photography" },
+    { name: "Bob", age: 30, bio: "Enjoys cooking and traveling" },
+    { name: "Carol", age: 22, bio: "Passionate about art and music" },
+  ];
+
   return (
-    <div>
+    <UserContext.Provider value={users}>
       <Header />
       <MainContent />
 
-      {/* Each UserProfile consumes its own context value */}
-      <UserContext.Provider value={{ name: "Alice", age: 25, bio: "Loves hiking and photography" }}>
-        <UserProfile />
-      </UserContext.Provider>
-
-      <UserContext.Provider value={{ name: "Bob", age: 30, bio: "Enjoys cooking and traveling" }}>
-        <UserProfile />
-      </UserContext.Provider>
-
-      <UserContext.Provider value={{ name: "Carol", age: 22, bio: "Passionate about art and music" }}>
-        <UserProfile />
-      </UserContext.Provider>
+      {/* Render each user profile */}
+      {users.map((user, index) => (
+        <UserProfile key={index} userIndex={index} />
+      ))}
 
       <Footer />
-    </div>
+    </UserContext.Provider>
   );
 }
+
 
