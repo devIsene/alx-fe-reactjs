@@ -10,29 +10,17 @@ export default function App() {
       <Header />
       <MainContent />
 
-      {/* User Profiles Section */}
       <section style={{ maxWidth: '900px', margin: '0 auto' }}>
-        <UserProfile
-          name="Alice"
-          age={25}
-          bio="Loves hiking and photography"
-        />
-        <UserProfile
-          name="Bob"
-          age={30}
-          bio="Enjoys cooking and traveling"
-        />
-        <UserProfile
-          name="Carol"
-          age={22}
-          bio="Passionate about art and music"
-        />
+        <UserProfile name="Alice" age={25} bio="Loves hiking and photography" />
+        <UserProfile name="Bob" age={30} bio="Enjoys cooking and traveling" />
+        <UserProfile name="Carol" age={22} bio="Passionate about art and music" />
       </section>
 
       <Footer />
     </div>
   );
 }
+
 
 
 

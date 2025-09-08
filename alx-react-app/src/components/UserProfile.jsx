@@ -1,16 +1,17 @@
 import React from "react";
 
-export default function UserProfile({ name, age, bio }) {
+export default function UserProfile(props) {
   return (
     <div style={{ border: '1px solid gray', padding: '10px', margin: '10px' }}>
-      <h2 style={{ color: 'blue' }}>{name}</h2>
+      <h2 style={{ color: 'blue' }}>{props.name}</h2>
       <p>
-        Age: <span style={{ fontWeight: 'bold' }}>{age}</span>
+        Age: <span style={{ fontWeight: 'bold' }}>{props.age}</span>
       </p>
-      <p>Bio: {bio}</p>
+      <p>Bio: {props.bio}</p>
     </div>
   );
 }
+
 
 
 
