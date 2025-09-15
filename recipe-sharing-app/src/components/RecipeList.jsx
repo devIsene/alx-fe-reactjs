@@ -23,7 +23,8 @@ const RecipeList = () => {
                 </Link>
               </h3>
               <p>{recipe.description}</p>
-              <DeleteRecipeButton id={recipe.id} />
+              
+              <DeleteRecipeButton recipeId={recipe.id} />
             </li>
           ))}
         </ul>
@@ -33,6 +34,7 @@ const RecipeList = () => {
 };
 
 export default RecipeList;
+
 
 
 
