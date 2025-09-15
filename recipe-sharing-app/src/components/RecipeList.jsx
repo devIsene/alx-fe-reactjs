@@ -1,6 +1,7 @@
 import React from 'react';
 import { useRecipeStore } from '../store/recipeStore';
 import DeleteRecipeButton from './DeleteRecipeButton';
+import { Link } from 'react-router-dom';
 
 const RecipeList = () => {
   const filteredRecipes = useRecipeStore((state) => state.filteredRecipes);
@@ -13,7 +14,14 @@ const RecipeList = () => {
         <ul>
           {filteredRecipes.map((recipe) => (
             <li key={recipe.id} className="mb-4 p-3 border rounded">
-              <h3 className="font-bold">{recipe.title}</h3>
+              <h3 className="font-bold text-lg">
+                <Link
+                  to={`/recipes/${recipe.id}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  {recipe.title}
+                </Link>
+              </h3>
               <p>{recipe.description}</p>
               <DeleteRecipeButton id={recipe.id} />
             </li>
@@ -25,6 +33,7 @@ const RecipeList = () => {
 };
 
 export default RecipeList;
+
 
 
 
