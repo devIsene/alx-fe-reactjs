@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useRecipeStore } from './recipeStore'; // ✅ corrected path
+import { useRecipeStore } from './recipeStore';
 
 const AddRecipeForm = () => {
   const addRecipe = useRecipeStore((state) => state.addRecipe);
@@ -10,7 +10,7 @@ const AddRecipeForm = () => {
     e.preventDefault();
     if (!title || !description) return;
 
-    addRecipe({ id: Date.now(), title, description });
+    addRecipe({ id: Date.now().toString(), title, description });
     setTitle('');
     setDescription('');
   };
@@ -37,4 +37,5 @@ const AddRecipeForm = () => {
 };
 
 export default AddRecipeForm;
+
 
