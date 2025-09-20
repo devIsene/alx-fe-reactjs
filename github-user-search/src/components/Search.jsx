@@ -1,135 +1,140 @@
+// src/components/Search.jsx
 import { useState } from "react";
-import { searchUsers, fetchUserDetails } from "../services/githubService";
+import { fetchUsers, fetchUserData } from "../services/githubService";
 
-export default function Search() {
-  const [query, setQuery] = useState("");
+const Search = () => {
+  const [username, setUsername] = useState("");
   const [location, setLocation] = useState("");
-  const [minRepos, setMinRepos] = useState(0);
-  const [users, setUsers] = useState([]);
+  const [minRepos, setMinRepos] = useState("");
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const [page, setPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const usersPerPage = 5;
+  const [hasMore, setHasMore] = useState(false);
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!query) return;
-
+  const handleSearch = async (reset = true) => {
+    if (reset) {
+      setPage(1);
+      setResults([]);
+    }
     setLoading(true);
-    setError(null);
+    setError("");
 
     try {
-      const data = await searchUsers(query, location, minRepos, page, usersPerPage);
-      setTotalCount(data.total_count);
+      const data = await fetchUsers(username, location, minRepos, reset ? 1 : page);
+      const users = data.items;
 
-      // Fetch detailed info for each user
+      // Fetch more details for each user
       const detailedUsers = await Promise.all(
-        data.items.map(async (user) => {
-          const details = await fetchUserDetails(user.login);
-          return { ...user, ...details };
+        users.map(async (user) => {
+          try {
+            const details = await fetchUserData(user.login);
+            return { ...user, ...details };
+          } catch {
+            return user;
+          }
         })
       );
 
-      setUsers(detailedUsers);
+      setResults((prev) => (reset ? detailedUsers : [...prev, ...detailedUsers]));
+      setHasMore(data.total_count > (reset ? detailedUsers.length : results.length + detailedUsers.length));
     } catch (err) {
-      setError("Looks like we can't find the user");
+      setError("Looks like we cant find the user");
     } finally {
       setLoading(false);
     }
   };
 
-  const totalPages = Math.ceil(totalCount / usersPerPage);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleSearch(true);
+  };
+
+  const handleLoadMore = () => {
+    setPage((prev) => prev + 1);
+    handleSearch(false);
+  };
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">GitHub User Search</h1>
-
-      <form onSubmit={handleSearch} className="mb-4 flex gap-2">
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">GitHub User Search</h1>
+      <form onSubmit={handleSubmit} className="space-y-2">
         <input
           type="text"
           placeholder="Enter GitHub username"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="border p-2 rounded"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="border p-2 w-full rounded"
         />
         <input
           type="text"
           placeholder="Location (optional)"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          className="border p-2 rounded"
+          className="border p-2 w-full rounded"
         />
         <input
           type="number"
-          placeholder="Min repos (optional)"
+          placeholder="Min repositories (optional)"
           value={minRepos}
-          onChange={(e) => setMinRepos(Number(e.target.value))}
-          className="border p-2 rounded w-32"
+          onChange={(e) => setMinRepos(e.target.value)}
+          className="border p-2 w-full rounded"
         />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+        <button
+          type="submit"
+          className="bg-blue-500 text-white p-2 rounded w-full"
+        >
           Search
         </button>
       </form>
 
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-
-      <ul>
-        {users.map((user) => (
-          <li key={user.id} className="border p-4 mb-2 rounded">
-            <img src={user.avatar_url} alt={user.login} className="w-16 h-16 rounded-full" />
-            <p className="font-bold">{user.login}</p>
-            <p>Name: {user.name || "N/A"}</p>
-            <p>Location: {user.location || "N/A"}</p>
-            <p>Public Repos: {user.public_repos}</p>
-            <p>Followers: {user.followers}</p>
-            <p>Following: {user.following}</p>
-            <a
-              href={user.html_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500"
-            >
-              View Profile
-            </a>
-          </li>
+      <div className="mt-4">
+        {loading && <p>Loading...</p>}
+        {error && <p>{error}</p>}
+        {results.map((user) => (
+          <div
+            key={user.id}
+            className="border p-4 rounded mb-2 flex items-center space-x-4"
+          >
+            <img
+              src={user.avatar_url}
+              alt={user.login}
+              className="w-16 h-16 rounded-full"
+            />
+            <div>
+              <a
+                href={user.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-lg font-bold text-blue-600"
+              >
+                {user.login}
+              </a>
+              <p>Name: {user.name || "N/A"}</p>
+              <p>Location: {user.location || "Not available"}</p>
+              <p>Repos: {user.public_repos ?? "N/A"}</p>
+              <p>Followers: {user.followers ?? "N/A"}</p>
+              <p>Following: {user.following ?? "N/A"}</p>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex gap-2 mt-4">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((p) => p - 1)}
-            className="bg-gray-300 px-3 py-1 rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-
-          {[...Array(totalPages)].map((_, index) => (
-            <button
-              key={index + 1}
-              className={page === index + 1 ? "bg-blue-500 text-white px-3 py-1 rounded" : "bg-gray-300 px-3 py-1 rounded"}
-              onClick={() => setPage(index + 1)}
-            >
-              {index + 1}
-            </button>
-          ))}
-
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage((p) => p + 1)}
-            className="bg-gray-300 px-3 py-1 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+      {hasMore && !loading && (
+        <button
+          onClick={handleLoadMore}
+          className="bg-green-500 text-white p-2 rounded mt-4 w-full"
+        >
+          Load More
+        </button>
       )}
     </div>
   );
-}
+};
+
+export default Search;
+
+
 
 
 
