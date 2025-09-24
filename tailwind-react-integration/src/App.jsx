@@ -1,12 +1,14 @@
+// src/App.jsx
+import UserProfile from "./components/UserProfile";
+
 function App() {
   return (
-    <div className="bg-white min-h-screen flex items-center justify-center">
-      <h1 className="text-2xl font-bold text-black">
-        Hello, Tailwind!
-      </h1>
+    <div>
+      <UserProfile />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
+
 
